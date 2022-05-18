@@ -122,12 +122,12 @@ func main() {
 
 	var all bool
 	if args.Man != nil {
-		head := `3xd is a tool for extracting information row by row. A number of commands and options are supported.
+		man := `3xd is a tool for extracting information row by row. A number of commands and options are supported.
 3xd support config files in JSON and YAML format. Please check config_template.[json/yaml]. If a config is present in the root directory then the arguments
 will be provided from there. Note that JSON file has a priority over YAML file.
 To get help for all the commands use $3xd [-h | --help].
 To get a help for an individual command use $3xd <command> [-h | --help].`
-		fmt.Println(head + "\n" + extractHelpSubcommand(parser, "3xd"))
+		fmt.Println(man)
 		return
 	} else if args.Import != nil {
 		all = false
