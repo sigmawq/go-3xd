@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"bytes"
 	"bufio"
+	"bytes"
 	"encoding/json"
-	"gopkg.in/yaml.v2"
+	"fmt"
 	"github.com/alexflint/go-arg"
+	"gopkg.in/yaml.v2"
+	"os"
 )
 
 func RunImport(verbose bool, all bool) {
@@ -18,22 +18,20 @@ func RunImport(verbose bool, all bool) {
 
 	fmt.Printf("%v Import begins...\n", prefix)
 	for i := 1; i < 100; i++ {
-		if i % 10 == 0 && verbose {
+		if i%10 == 0 && verbose {
 			fmt.Printf("%v Outputting %v row..\n", prefix, i)
 		}
 	}
 
 	fmt.Printf("%v 100 rows have been imported\n", prefix)
-}	
-
-type ImportCmd struct {}
+}
 
 type SyncCmd struct {
-	All bool`arg:"-a,--all" help:"Display the [All] prefix"`
+	All bool `arg:"-a,--all" help:"Display the [All] prefix"`
 }
 
 type Config struct {
-	All bool `json: "all" yaml: "all"`
+	All     bool `json: "all" yaml: "all"`
 	Verbose bool `json: "verbose" yaml:"verbose"`
 }
 
@@ -56,7 +54,7 @@ func loadYaml() Config {
 	file, err := os.ReadFile("config.yaml")
 	if err != nil {
 		panic(err)
-	}	
+	}
 
 	config := Config{}
 	err = yaml.Unmarshal(file, &config)
@@ -97,25 +95,46 @@ func initialize() (Config, bool) {
 	return config, false
 }
 
+func extractHelp(parser *arg.Parser) string {
+	var buf bytes.Buffer
+	bufW := bufio.NewWriter(&buf)
+	parser.WriteHelp(bufW)
+	bufW.Flush()
+	return buf.String()
+}
+
+func extractHelpSubcommand(parser *arg.Parser, subcommand string) string {
+	var buf bytes.Buffer
+	bufW := bufio.NewWriter(&buf)
+	parser.WriteHelpForSubcommand(bufW, subcommand)
+	bufW.Flush()
+	return buf.String()
+}
+
 func main() {
 	var args struct {
-		Import *ImportCmd `arg:"subcommand:import" help:"Import 100 rows"`
-		Sync   *SyncCmd   `arg:"subcommand:sync" help:"Import 100 rows with an optional sync"`
-		Verbose bool `arg:"-v,--verbose" help:"Display verbose ouput"`
+		Man     *struct{} `arg:"subcommand:man" help:"Show man"`
+		Import  *struct{} `arg:"subcommand:import" help:"Import 100 rows"`
+		Sync    *SyncCmd  `arg:"subcommand:sync" help:"Import 100 rows with an optional sync"`
+		Verbose bool      `arg:"-v,--verbose" help:"Display verbose ouput"`
 	}
 	parser := arg.MustParse(&args)
 
 	var all bool
-	if args.Import != nil {
+	if args.Man != nil {
+		head := `3xd is a tool for extracting information row by row. A number of commands and options are supported.
+3xd support config files in JSON and YAML format. Please check config_template.[json/yaml]. If a config is present in the root directory then the arguments
+will be provided from there. Note that JSON file has a priority over YAML file.
+To get help for all the commands use $3xd [-h | --help].
+To get a help for an individual command use $3xd <command> [-h | --help].`
+		fmt.Println(head + "\n" + extractHelpSubcommand(parser, "3xd"))
+		return
+	} else if args.Import != nil {
 		all = false
 	} else if args.Sync != nil {
 		all = args.Sync.All
 	} else {
-		var buf bytes.Buffer
-		bufW := bufio.NewWriter(&buf)
-		parser.WriteHelp(bufW)
-		bufW.Flush()
-		fmt.Println(buf.String())
+		fmt.Println(extractHelp(parser))
 		return
 	}
 
