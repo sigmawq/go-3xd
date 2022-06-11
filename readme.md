@@ -1,6 +1,6 @@
 # 3xd
 
-Note: this is a dummy program to test a CLI library. It does literally nothing useful. The below description is mostly fictional.
+Note: this is a dummy program to test a CLI library. It does literally nothing useful. The below description is mostly fictional. (except for the CLI interface itself)
 
 ## Description
 3xd is a tool for extracting information row by row. A number of commands and options are supported.
